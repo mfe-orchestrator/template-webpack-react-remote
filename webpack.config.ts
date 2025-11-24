@@ -51,8 +51,7 @@ const config: WebpackConfiguration = {
       name: 'remote',
       filename: 'remoteEntry.js',
       exposes: {
-        './App': './src/App',
-        './Button': './src/Button',
+        './Button': './src/components/Button',
       },
       shared: {
         react: {

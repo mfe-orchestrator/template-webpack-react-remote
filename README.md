@@ -1,77 +1,107 @@
 # Webpack React Remote Microfrontend Template
 
-Template per creare un microfrontend remoto con Webpack Module Federation, React e TypeScript.
+Template for creating a remote microfrontend with Webpack Module Federation, React, and TypeScript.
 
-## Struttura del Progetto
+## Project Structure
 
 ```
 template-webpack-react-remote/
 ├── public/
 │   └── index.html          # HTML template
 ├── src/
-│   ├── @types/
+│   ├── types/
 │   │   └── global.d.ts     # Type definitions
-│   ├── App.tsx             # Componente principale esposto
-│   ├── bootstrap.tsx       # Entry point dell'applicazione
-│   └── index.ts            # Entry point Webpack
+│   ├── components/
+│   │   └── Button.tsx      # Button component (exposed)
+│   ├── App.tsx             # Main application component (exposed)
+│   ├── bootstrap.tsx       # Application entry point
+│   └── index.ts            # Webpack entry point
+├── dist/                   # Production build output
 ├── package.json
+├── pnpm-lock.yaml          # PNPM lockfile
 ├── tsconfig.json
-├── webpack.config.js       # Configurazione Webpack con Module Federation
+├── webpack.config.ts       # Webpack configuration with Module Federation
+├── LICENSE
 └── .gitignore
 ```
 
-## Installazione
+## Installation
+
+This project uses **PNPM** as the package manager. Make sure you have PNPM installed:
 
 ```bash
-npm install
+npm install -g pnpm
 ```
 
-## Comandi Disponibili
-
-### Sviluppo
-
-Avvia il server di sviluppo sulla porta 3001:
+Then install dependencies:
 
 ```bash
-npm start
+pnpm install
 ```
 
-L'applicazione sarà disponibile su http://localhost:3001
+## Available Commands
 
-### Build di Produzione
+### Development
 
-Crea la build di produzione nella cartella `dist`:
+Start the development server on port 3000:
 
 ```bash
-npm build
+pnpm dev
+```
+
+The application will be available at http://localhost:3000
+
+### Production Build
+
+Create a production build in the `dist` folder:
+
+```bash
+pnpm build
+```
+
+This command will:
+1. Run TypeScript compiler
+2. Build the application with Webpack
+3. Generate TypeScript declaration files
+
+### Build Types Only
+
+Generate only TypeScript declaration files:
+
+```bash
+pnpm build:types
 ```
 
 ### Serve Build
 
-Serve la build di produzione:
+Serve the production build on port 3001:
 
 ```bash
-npm run serve
+pnpm serve
 ```
+
+The production build will be available at http://localhost:3001
 
 ## Module Federation
 
-Questo template è configurato come **remote** microfrontend che espone:
+This template is configured as a **remote** microfrontend that exposes:
 
-- **Nome**: `remote`
+- **Name**: `remote`
 - **File**: `remoteEntry.js`
-- **Porta**: 3001
-- **Componente esposto**: `./App` (src/App.tsx)
+- **Port**: 3000
+- **Exposed Components**:
+  - `./App` (src/App.tsx) - Main application component
+  - `./Button` (src/Button.tsx) - Reusable button component
 
-### Configurazione Host
+### Host Configuration
 
-Per consumare questo remote da un'applicazione host, aggiungi nella configurazione webpack dell'host:
+To consume this remote from a host application, add to the host's webpack configuration:
 
 ```javascript
 new ModuleFederationPlugin({
   name: 'host',
   remotes: {
-    remote: 'remote@http://localhost:3001/remoteEntry.js',
+    remote: 'remote@http://localhost:3000/remoteEntry.js',
   },
   shared: {
     react: { singleton: true },
@@ -80,7 +110,9 @@ new ModuleFederationPlugin({
 })
 ```
 
-### Utilizzo nell'Host
+### Usage in Host
+
+#### Importing the App Component
 
 ```typescript
 import React, { lazy, Suspense } from 'react';
@@ -96,49 +128,80 @@ function App() {
 }
 ```
 
-## Tecnologie
+#### Importing the Button Component
 
-- React 18
-- TypeScript 5
+```typescript
+import React, { lazy, Suspense } from 'react';
+
+const RemoteButton = lazy(() => import('remote/Button'));
+
+function App() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RemoteButton
+        variant="primary"
+        onClick={() => console.log('Clicked!')}
+      >
+        Click Me
+      </RemoteButton>
+    </Suspense>
+  );
+}
+```
+
+## Technologies
+
+- React 19.2
+- TypeScript 5.9
 - Webpack 5 with Module Federation
 - ts-loader
+- PNPM (Package Manager)
+- CSS Loader & Style Loader
 
-## Personalizzazione
+## Customization
 
-### Cambiare la porta
+### Change Port
 
-Modifica la porta nel file `webpack.config.js`:
+Modify the port in the `webpack.config.ts` file:
 
-```javascript
+```typescript
 devServer: {
-  port: 3001, // <- cambia questa porta
+  port: 3000, // <- change this port
 }
 ```
 
-### Aggiungere nuovi componenti esposti
+### Add New Exposed Components
 
-Nel file `webpack.config.js`, aggiungi nuovi export nella sezione `exposes`:
+In the `webpack.config.ts` file, add new exports in the `exposes` section.
 
-```javascript
+Current configuration:
+```typescript
 exposes: {
-  './App': './src/App',
-  './Button': './src/components/Button', // nuovo componente
+  './Button': './src/Button',
 }
 ```
 
-### Modificare il nome del remote
+To add a new component:
+```typescript
+exposes: {
+  './Button': './src/Button',
+  './NewComponent': './src/components/NewComponent', // new component
+}
+```
 
-Nel file `webpack.config.js`:
+### Change Remote Name
 
-```javascript
+In the `webpack.config.ts` file:
+
+```typescript
 new ModuleFederationPlugin({
-  name: 'remote', // <- cambia questo nome
+  name: 'remote', // <- change this name
   // ...
 })
 ```
 
-## Note
+## Notes
 
-- I moduli `react` e `react-dom` sono configurati come singleton per evitare duplicazioni
-- Il bootstrap dinamico (`index.ts` -> `bootstrap.tsx`) è necessario per il corretto funzionamento di Module Federation
-- La configurazione CORS è abilitata per permettere il caricamento da altri domini
+- The `react` and `react-dom` modules are configured as singletons to avoid duplications
+- Dynamic bootstrap (`index.ts` -> `bootstrap.tsx`) is necessary for Module Federation to work correctly
+- CORS configuration is enabled to allow loading from other domains
