@@ -4,8 +4,7 @@
   "description": "Webpack Module Federation Remote Template with TypeScript and React",
   "scripts": {
     "dev": "webpack serve --mode development",
-    "build": "tsc && webpack --mode production && npm run build:types",
-    "build:types": "tsc --emitDeclarationOnly",
+    "build": "tsc && webpack --mode production",
     "serve": "serve dist -p 3001"
   },
   "keywords": [
