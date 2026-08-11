@@ -2,6 +2,7 @@
   "name": "template-webpack-react-remote",
   "version": "1.0.0",
   "description": "Webpack Module Federation Remote Template with TypeScript and React",
+  "packageManager": "pnpm@11.21.0",
   "scripts": {
     "dev": "webpack serve --mode development",
     "build": "tsc && webpack --mode production",
@@ -34,7 +35,7 @@
     "ts-loader": "^9.5.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "webpack": "^5.103.0",
+    "webpack": "^5.109.2",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2"
   }
