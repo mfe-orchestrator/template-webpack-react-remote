@@ -57,7 +57,11 @@ const config: WebpackConfiguration = {
   },
   plugins: [
     new ModuleFederationPlugin({
-      name: 'remote',
+      // The container name hosts load this remote by. When the console creates a
+      // microfrontend from this template it rewrites the string on the marked line
+      // to the federation name of the microfrontend's slug ("checkout-new" ->
+      // "checkoutnew"): keep the marker comment on this line.
+      name: 'exampleremote', // mfe-orchestrator:federation-name
       filename: 'remoteEntry.js',
       exposes: {
         './Button': './src/components/Button',
