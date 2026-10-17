@@ -27,7 +27,7 @@ template-webpack-react-remote/
 
 ## Installation
 
-This project uses **PNPM** as the package manager. Make sure you have PNPM installed:
+This project uses **PNPM** as the package manager and needs Node.js 22.18 or later. Make sure you have PNPM installed:
 
 ```bash
 npm install -g pnpm
@@ -151,12 +151,13 @@ function App() {
 
 ## Technologies
 
-- React 19.2
-- TypeScript 5.9
+- React 19.3
+- TypeScript 7 (type checking only, through `tsc` in the build script)
 - Webpack 5 with Module Federation
-- ts-loader
-- PNPM (Package Manager)
+- swc-loader, which strips the types and compiles the JSX
+- PNPM 12 (Package Manager)
 - CSS Loader & Style Loader
+- Node.js 22.18 or later: webpack-cli loads `webpack.config.ts` through Node's built-in type stripping, so there is no ts-node
 
 ## Customization
 

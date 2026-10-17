@@ -1,0 +1,8 @@
+allowBuilds:
+  # The postinstall only double checks the native binary that the platform specific
+  # optional dependency already ships, so it is not needed.
+  '@swc/core': false
+
+overrides:
+  # serve@14.2.6 (latest) pins compression@1.8.1, which has a known vulnerability.
+  'serve>compression': ^1.8.2
