@@ -36,9 +36,18 @@ const config: WebpackConfiguration = {
   module: {
     rules: [
       {
+        // swc only strips the types; `tsc` (TypeScript 7, which has no JS API for a
+        // loader to call) does the type checking in the build script.
         test: /\.tsx?$/,
-        loader: 'ts-loader',
         exclude: /node_modules/,
+        loader: 'swc-loader',
+        options: {
+          jsc: {
+            parser: { syntax: 'typescript', tsx: true },
+            transform: { react: { runtime: 'automatic' } },
+            target: 'es2020',
+          },
+        },
       },
       {
         test: /\.css$/,
