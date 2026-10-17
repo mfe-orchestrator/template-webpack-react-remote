@@ -13,7 +13,7 @@ template-webpack-react-remote/
 │   │   └── global.d.ts     # Type definitions
 │   ├── components/
 │   │   └── Button.tsx      # Button component (exposed)
-│   ├── App.tsx             # Main application component (exposed)
+│   ├── App.tsx             # Standalone page of the remote
 │   ├── bootstrap.tsx       # Application entry point
 │   └── index.ts            # Webpack entry point
 ├── dist/                   # Production build output
@@ -86,22 +86,42 @@ The production build will be available at http://localhost:3001
 
 This template is configured as a **remote** microfrontend that exposes:
 
-- **Name**: `remote`
+- **Name**: `exampleremote` (see [The container name](#the-container-name))
 - **File**: `remoteEntry.js`
 - **Port**: 3000
 - **Exposed Components**:
-  - `./App` (src/App.tsx) - Main application component
-  - `./Button` (src/Button.tsx) - Reusable button component
+  - `./Button` (src/components/Button.tsx) - Reusable button component
+
+### The container name
+
+```typescript
+new ModuleFederationPlugin({
+  name: 'exampleremote', // mfe-orchestrator:federation-name
+  // ...
+})
+```
+
+A webpack host does not import this remote by its URL: it injects `remoteEntry.js` and then looks
+the container up **by this name**. When the MFE Orchestrator console creates a microfrontend from
+this template, it rewrites the string on the line carrying the `mfe-orchestrator:federation-name`
+marker to the federation name of the microfrontend's slug: slashes become underscores and dashes
+go, so `checkout-new` becomes `checkoutnew`. That is the same name the console writes into the
+hosts it configures, and the `nameToIntegrate` it serves in the manifest.
+
+Keep the marker on that line. If you rename the container by hand, use that same derived name.
 
 ### Host Configuration
 
-To consume this remote from a host application, add to the host's webpack configuration:
+A host resolves this remote through the orchestrator client SDK (`@mfe-orchestrator-hub/client`
+0.3.0 or later), never through a URL written in its config:
 
 ```javascript
 new ModuleFederationPlugin({
   name: 'host',
   remotes: {
-    remote: 'remote@http://localhost:3000/remoteEntry.js',
+    // key: what the host imports from; 'checkout-new': the slug in the orchestrator;
+    // 'checkoutnew': this remote's container name, federationName(slug)
+    checkoutnew: "promise globalThis.__MFE_ORCHESTRATOR__.loadWebpackRemote('checkout-new', 'checkoutnew')",
   },
   shared: {
     react: { singleton: true },
@@ -110,30 +130,17 @@ new ModuleFederationPlugin({
 })
 ```
 
+The host calls `configure()` from the SDK at the top of its entry point, before anything imports a
+remote. `loadWebpackRemote()` asks the backend for the URL of the version to serve, injects that
+`remoteEntry.js` once and returns the container. The webpack host templates of the orchestrator
+come wired this way.
+
 ### Usage in Host
 
-#### Importing the App Component
-
 ```typescript
 import React, { lazy, Suspense } from 'react';
 
-const RemoteApp = lazy(() => import('remote/App'));
-
-function App() {
-  return (
-    <Suspense fallback={<div>Loading Remote...</div>}>
-      <RemoteApp />
-    </Suspense>
-  );
-}
-```
-
-#### Importing the Button Component
-
-```typescript
-import React, { lazy, Suspense } from 'react';
-
-const RemoteButton = lazy(() => import('remote/Button'));
+const RemoteButton = lazy(() => import('checkoutnew/Button'));
 
 function App() {
   return (
@@ -178,28 +185,21 @@ In the `webpack.config.ts` file, add new exports in the `exposes` section.
 Current configuration:
 ```typescript
 exposes: {
-  './Button': './src/Button',
+  './Button': './src/components/Button',
 }
 ```
 
 To add a new component:
 ```typescript
 exposes: {
-  './Button': './src/Button',
+  './Button': './src/components/Button',
   './NewComponent': './src/components/NewComponent', // new component
 }
 ```
 
 ### Change Remote Name
 
-In the `webpack.config.ts` file:
-
-```typescript
-new ModuleFederationPlugin({
-  name: 'remote', // <- change this name
-  // ...
-})
-```
+See [The container name](#the-container-name): the console sets it for you from the slug.
 
 ## Notes
 
