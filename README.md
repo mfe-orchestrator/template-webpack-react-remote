@@ -27,10 +27,10 @@ template-webpack-react-remote/
 
 ## Installation
 
-This project uses **PNPM** as the package manager and needs Node.js 22.18 or later. Make sure you have PNPM installed:
+This project uses **pnpm** 12 as the package manager (pinned in `packageManager`) and needs Node.js 22.18 or later. Enable corepack so it picks up that version:
 
 ```bash
-npm install -g pnpm
+corepack enable
 ```
 
 Then install dependencies:
